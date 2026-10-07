@@ -2,73 +2,132 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>ATL Bank</title>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
-:root{--ink:#10283d;--teal:#0f766e;--gold:#e8a317;--bg:#f4f7f8;--card:#fff;--line:#d9e2e6;--red:#b42318}
+:root{--ink:#0d2438;--teal:#0f766e;--gold:#e8a317;--bg:#f2f6f7;--line:#dbe4e8;--red:#b42318}
 *{box-sizing:border-box}
-body{margin:0;font-family:Manrope,system-ui,sans-serif;background:var(--bg);color:var(--ink)}
-header{background:var(--ink);color:#fff;padding:14px 18px;display:flex;justify-content:space-between;align-items:center}
-header b{font-size:20px;letter-spacing:.5px}header b span{color:var(--gold)}
-main{max-width:520px;margin:0 auto;padding:18px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px;margin-bottom:16px}
-h2{margin:0 0 10px;font-size:18px}
-input,button{font:inherit;width:100%;padding:12px;border-radius:8px;border:1px solid var(--line);margin-top:8px}
+body{margin:0;font-family:Manrope,system-ui,sans-serif;background:var(--bg);color:var(--ink);padding-bottom:78px}
+header{background:var(--ink);color:#fff;padding:16px 18px 70px}
+header b{font-size:20px}header b span{color:var(--gold)}
+header p{margin:14px 0 0;opacity:.85;font-size:14px}header h1{margin:2px 0 0;font-size:22px}
+main{max-width:520px;margin:0 auto;padding:0 16px}
+.up{margin-top:-52px}
+.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:14px}
+h2{margin:0 0 10px;font-size:17px}
+input,button{font:inherit;width:100%;padding:12px;border-radius:10px;border:1px solid var(--line);margin-top:8px}
 button{background:var(--teal);color:#fff;border:0;font-weight:600;cursor:pointer}
 button.alt{background:none;color:var(--teal);border:1px solid var(--teal)}
 button.sm{width:auto;padding:6px 12px;margin:0}
 :focus-visible{outline:3px solid var(--gold);outline-offset:2px}
-.bal{background:var(--teal);color:#fff;border-radius:12px;padding:22px;margin-bottom:16px}
-.bal small{opacity:.85}.bal div{font-size:34px;font-weight:800;margin-top:4px}
-.row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);gap:8px}
+.acct{background:linear-gradient(135deg,#0f766e,#0d2438);color:#fff;border:0}
+.acct small{opacity:.8}.bal{font-size:32px;font-weight:800;margin:2px 0 14px}
+.an{display:flex;justify-content:space-between;align-items:center;font-size:18px;font-weight:700;letter-spacing:1.5px}
+.an button{background:rgba(255,255,255,.18);font-size:13px;letter-spacing:0}
+.eye{width:auto;background:none;padding:0 4px;margin:0;font-size:13px;opacity:.9;text-decoration:underline}
+.acts{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+.act{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 4px;text-align:center;font-size:12px;font-weight:600;color:var(--ink);margin:0}
+.act i{display:block;font-style:normal;font-size:22px;margin-bottom:4px}
+.row{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid var(--line);gap:8px}
 .row:last-child{border:0}
-.tag{font-size:12px;padding:3px 8px;border-radius:99px;background:#fff3d1}
+.tag{font-size:12px;padding:3px 9px;border-radius:99px;background:#fff3d1}
 .ok{background:#d6f3e9}.no{background:#fde2e0}
+.kv{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px}
+.kv:last-child{border:0}.kv span:first-child{color:#5b6f7c}
+nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--line);display:flex;padding-bottom:env(safe-area-inset-bottom,0)}
+nav button{background:none;color:#5b6f7c;border:0;border-radius:0;margin:0;padding:10px 0;font-size:12px;font-weight:600}
+nav button i{display:block;font-style:normal;font-size:20px}
+nav button.on{color:var(--teal)}
 #msg{color:var(--red);min-height:20px;margin-top:8px;font-size:14px}
 .hide{display:none}
+#auth{max-width:520px;margin:-40px auto 0;padding:0 16px}
 </style>
 </head>
 <body>
-<header><b>ATL <span>Bank</span></b><button id="out" class="sm hide">Log out</button></header>
-<main>
+
+<header>
+  <b>ATL <span>Bank</span></b>
+  <div id="hello" class="hide"><p>Welcome back</p><h1 id="who"></h1></div>
+</header>
 
 <!-- AUTH -->
-<section id="auth" class="card">
-  <h2 id="authTitle">Log in to your wallet</h2>
+<section id="auth">
+ <div class="card">
+  <h2 id="authTitle">Log in to your account</h2>
   <input id="name" class="hide" placeholder="Full name" autocomplete="name">
   <input id="email" type="email" placeholder="Email" autocomplete="email">
   <input id="pass" type="password" placeholder="Password (6+ characters)" autocomplete="current-password">
   <button id="go">Log in</button>
-  <button id="swap" class="alt">Create an account</button>
+  <button id="swap" class="alt">Open an account</button>
   <button id="forgot" class="alt">Forgot password</button>
   <div id="msg"></div>
+ </div>
 </section>
 
-<!-- DASHBOARD -->
-<section id="app" class="hide">
-  <div class="bal"><small>Wallet balance</small><div id="bal">₦0.00</div></div>
+<main id="app" class="hide up">
 
+ <!-- HOME -->
+ <div id="t-home">
+  <div class="card acct">
+   <small>Available balance <button class="eye" id="eye">Hide</button></small>
+   <div class="bal" id="bal">₦0.00</div>
+   <small>ATL Bank account number</small>
+   <div class="an"><span id="an1">----------</span><button class="sm" data-copy>Copy</button></div>
+  </div>
+  <div class="acts">
+   <button class="act" data-go="deposit"><i>⬇</i>Add money</button>
+   <button class="act" data-go="history"><i>🧾</i>History</button>
+   <button class="act" onclick="alert('Coming soon')"><i>📱</i>Airtime</button>
+   <button class="act" onclick="alert('Coming soon')"><i>📶</i>Data</button>
+  </div>
+  <div class="card"><h2>Recent activity</h2><div id="recent"></div></div>
+ </div>
+
+ <!-- DEPOSIT -->
+ <div id="t-deposit" class="hide">
   <div class="card">
-    <h2>Request a deposit</h2>
-    <input id="amt" type="number" min="100" placeholder="Amount in ₦">
-    <button id="dep">Send deposit request</button>
-    <small>Your balance updates after ATL Bank confirms your payment.</small>
+   <h2>Fund your account</h2>
+   <div class="kv"><span>Bank</span><b>ATL Bank</b></div>
+   <div class="kv"><span>Account name</span><b id="an-name"></b></div>
+   <div class="kv"><span>Account number</span><b id="an2"></b></div>
+   <button class="alt" data-copy>Copy account number</button>
   </div>
-
-  <div class="card"><h2>My deposits</h2><div id="list"></div></div>
-
-  <div class="card hide" id="admin">
-    <h2>Admin: pending deposits</h2><div id="pending"></div>
+  <div class="card">
+   <h2>I have paid, confirm my deposit</h2>
+   <input id="amt" type="number" min="100" placeholder="Amount in ₦">
+   <button id="dep">Send deposit request</button>
+   <small>Your balance updates after ATL Bank confirms your payment.</small>
   </div>
-</section>
+ </div>
+
+ <!-- HISTORY -->
+ <div id="t-history" class="hide"><div class="card"><h2>Transaction history</h2><div id="list"></div></div></div>
+
+ <!-- PROFILE -->
+ <div id="t-profile" class="hide">
+  <div class="card">
+   <h2>My profile</h2>
+   <div class="kv"><span>Name</span><b id="p-name"></b></div>
+   <div class="kv"><span>Email</span><b id="p-email"></b></div>
+   <div class="kv"><span>Account number</span><b id="p-an"></b></div>
+   <button id="out" class="alt">Log out</button>
+  </div>
+  <div class="card hide" id="admin"><h2>Admin: pending deposits</h2><div id="pending"></div></div>
+ </div>
 </main>
+
+<nav id="nav" class="hide">
+ <button data-go="home" class="on"><i>🏠</i>Home</button>
+ <button data-go="deposit"><i>➕</i>Deposit</button>
+ <button data-go="history"><i>🧾</i>History</button>
+ <button data-go="profile"><i>👤</i>Profile</button>
+</nav>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script>
-// 1) PASTE YOUR FIREBASE CONFIG HERE
 firebase.initializeApp({
   apiKey:"AIzaSyBCIKezGxYH1ZUQdM21k2nJfVpCHJRrBf8",
   authDomain:"a-t-l-bank.firebaseapp.com",
@@ -80,19 +139,30 @@ firebase.initializeApp({
 const auth=firebase.auth(), db=firebase.firestore();
 const $=id=>document.getElementById(id);
 const naira=n=>"₦"+Number(n||0).toLocaleString("en-NG",{minimumFractionDigits:2});
-let signup=false, unsubs=[];
+let signup=false, unsubs=[], balance=0, hidden=false, acct="";
 
 function show(m){$("msg").textContent=m||""}
+function newAcct(){const a=new Uint32Array(2);crypto.getRandomValues(a);return "30"+String(a[0]*a[1]).padStart(8,"0").slice(-8)}
+function go(t){
+  ["home","deposit","history","profile"].forEach(x=>$("t-"+x).classList.toggle("hide",x!==t));
+  document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("on",b.dataset.go===t));
+  scrollTo(0,0);
+}
+document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go));
+document.querySelectorAll("[data-copy]").forEach(b=>b.onclick=async()=>{
+  try{await navigator.clipboard.writeText(acct);alert("Account number copied")}catch(e){alert(acct)}
+});
+function paintBal(){$("bal").textContent=hidden?"₦ ••••••":naira(balance);$("eye").textContent=hidden?"Show":"Hide"}
+$("eye").onclick=()=>{hidden=!hidden;paintBal()};
 
 $("swap").onclick=()=>{
   signup=!signup;
   $("name").classList.toggle("hide",!signup);
-  $("authTitle").textContent=signup?"Open your ATL wallet":"Log in to your wallet";
+  $("authTitle").textContent=signup?"Open your ATL Bank account":"Log in to your account";
   $("go").textContent=signup?"Create account":"Log in";
-  $("swap").textContent=signup?"I already have an account":"Create an account";
+  $("swap").textContent=signup?"I already have an account":"Open an account";
   show();
 };
-
 $("go").onclick=async()=>{
   show();
   const email=$("email").value.trim(), pass=$("pass").value;
@@ -101,67 +171,57 @@ $("go").onclick=async()=>{
       const name=$("name").value.trim();
       if(!name) return show("Enter your full name.");
       const c=await auth.createUserWithEmailAndPassword(email,pass);
-      await db.collection("users").doc(c.user.uid).set({name,email,balance:0,role:"user"});
+      await db.collection("users").doc(c.user.uid).set({name,email,balance:0,role:"user",acct:newAcct()});
       await c.user.sendEmailVerification();
-      show("Account created. Check your email to verify it.");
-    }else{
-      await auth.signInWithEmailAndPassword(email,pass);
-    }
+    }else await auth.signInWithEmailAndPassword(email,pass);
   }catch(e){show(e.message)}
 };
-
 $("forgot").onclick=async()=>{
   const email=$("email").value.trim();
   if(!email) return show("Enter your email first.");
-  try{await auth.sendPasswordResetEmail(email);show("Reset link sent to your email.")}
-  catch(e){show(e.message)}
+  try{await auth.sendPasswordResetEmail(email);show("Reset link sent to your email.")}catch(e){show(e.message)}
 };
-
 $("out").onclick=()=>auth.signOut();
 
-// Session persists on refresh (Firebase default). React to login state:
 auth.onAuthStateChanged(user=>{
   unsubs.forEach(u=>u());unsubs=[];
-  $("auth").classList.toggle("hide",!!user);
-  $("app").classList.toggle("hide",!user);
-  $("out").classList.toggle("hide",!user);
+  ["auth"].forEach(i=>$(i).classList.toggle("hide",!!user));
+  ["app","nav","hello"].forEach(i=>$(i).classList.toggle("hide",!user));
   if(!user) return;
-
-  unsubs.push(db.collection("users").doc(user.uid).onSnapshot(s=>{
+  go("home");
+  const ref=db.collection("users").doc(user.uid);
+  unsubs.push(ref.onSnapshot(async s=>{
     const d=s.data()||{};
-    $("bal").textContent=naira(d.balance);
+    if(s.exists && !d.acct){await ref.update({acct:newAcct()});return}
+    balance=d.balance||0; acct=d.acct||"";
+    paintBal();
+    $("who").textContent=d.name||"";
+    $("an1").textContent=$("an2").textContent=$("p-an").textContent=acct;
+    $("an-name").textContent=$("p-name").textContent=d.name||"";
+    $("p-email").textContent=d.email||user.email;
     $("admin").classList.toggle("hide",d.role!=="admin");
     if(d.role==="admin") loadPending();
   }));
-
-  unsubs.push(db.collection("deposits").where("uid","==",user.uid)
-    .onSnapshot(q=>{
-      const rows=q.docs.map(x=>x.data()).sort((a,b)=>(b.at?.seconds||0)-(a.at?.seconds||0));
-      $("list").innerHTML=rows.length?rows.map(r=>
-        `<div class="row"><span>${naira(r.amount)}</span><span class="tag ${r.status==="APPROVED"?"ok":r.status==="REJECTED"?"no":""}">${r.status}</span></div>`
-      ).join(""):"<small>No deposits yet. Send your first request above.</small>";
-    }));
+  unsubs.push(db.collection("deposits").where("uid","==",user.uid).onSnapshot(q=>{
+    const rows=q.docs.map(x=>x.data()).sort((a,b)=>(b.at?.seconds||0)-(a.at?.seconds||0));
+    const html=r=>`<div class="row"><span>Deposit<br><b>${naira(r.amount)}</b></span><span class="tag ${r.status==="APPROVED"?"ok":r.status==="REJECTED"?"no":""}">${r.status}</span></div>`;
+    $("list").innerHTML=rows.length?rows.map(html).join(""):"<small>No transactions yet.</small>";
+    $("recent").innerHTML=rows.length?rows.slice(0,3).map(html).join(""):"<small>No activity yet. Tap Add money to start.</small>";
+  }));
 });
 
-// Deposit request: always PENDING. No automatic credit.
 $("dep").onclick=async()=>{
   const amount=Number($("amt").value);
   if(!(amount>=100)) return alert("Minimum deposit is ₦100.");
-  await db.collection("deposits").add({
-    uid:auth.currentUser.uid, amount, status:"PENDING",
-    at:firebase.firestore.FieldValue.serverTimestamp()
-  });
-  $("amt").value="";
+  await db.collection("deposits").add({uid:auth.currentUser.uid,amount,status:"PENDING",at:firebase.firestore.FieldValue.serverTimestamp()});
+  $("amt").value="";alert("Request sent. ATL Bank will confirm it shortly.");go("history");
 };
 
-// Admin only: approve or reject
 function loadPending(){
   unsubs.push(db.collection("deposits").where("status","==","PENDING").onSnapshot(q=>{
-    $("pending").innerHTML=q.docs.length?q.docs.map(d=>{
-      const r=d.data();
+    $("pending").innerHTML=q.docs.length?q.docs.map(d=>{const r=d.data();
       return `<div class="row"><span>${naira(r.amount)}<br><small>${r.uid.slice(0,8)}…</small></span>
-      <span><button class="sm" onclick="decide('${d.id}',true)">Approve</button>
-      <button class="sm alt" onclick="decide('${d.id}',false)">Reject</button></span></div>`;
+      <span><button class="sm" onclick="decide('${d.id}',true)">Approve</button> <button class="sm alt" onclick="decide('${d.id}',false)">Reject</button></span></div>`;
     }).join(""):"<small>Nothing pending.</small>";
   }));
 }
@@ -170,10 +230,7 @@ async function decide(id,ok){
   await db.runTransaction(async t=>{
     const s=await t.get(ref), r=s.data();
     if(r.status!=="PENDING") return;
-    if(ok){
-      const u=db.collection("users").doc(r.uid), us=await t.get(u);
-      t.update(u,{balance:(us.data().balance||0)+r.amount});
-    }
+    if(ok){const u=db.collection("users").doc(r.uid), us=await t.get(u);t.update(u,{balance:(us.data().balance||0)+r.amount})}
     t.update(ref,{status:ok?"APPROVED":"REJECTED"});
   });
 }
