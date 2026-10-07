@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ATL Bank</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#10283d;--teal:#0f766e;--gold:#e8a317;--bg:#f4f7f8;--card:#fff;--line:#d9e2e6;--red:#b42318}
+*{box-sizing:border-box}
+body{margin:0;font-family:Manrope,system-ui,sans-serif;background:var(--bg);color:var(--ink)}
+header{background:var(--ink);color:#fff;padding:14px 18px;display:flex;justify-content:space-between;align-items:center}
+header b{font-size:20px;letter-spacing:.5px}header b span{color:var(--gold)}
+main{max-width:520px;margin:0 auto;padding:18px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px;margin-bottom:16px}
+h2{margin:0 0 10px;font-size:18px}
+input,button{font:inherit;width:100%;padding:12px;border-radius:8px;border:1px solid var(--line);margin-top:8px}
+button{background:var(--teal);color:#fff;border:0;font-weight:600;cursor:pointer}
+button.alt{background:none;color:var(--teal);border:1px solid var(--teal)}
+button.sm{width:auto;padding:6px 12px;margin:0}
+:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.bal{background:var(--teal);color:#fff;border-radius:12px;padding:22px;margin-bottom:16px}
+.bal small{opacity:.85}.bal div{font-size:34px;font-weight:800;margin-top:4px}
+.row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);gap:8px}
+.row:last-child{border:0}
+.tag{font-size:12px;padding:3px 8px;border-radius:99px;background:#fff3d1}
+.ok{background:#d6f3e9}.no{background:#fde2e0}
+#msg{color:var(--red);min-height:20px;margin-top:8px;font-size:14px}
+.hide{display:none}
+</style>
+</head>
+<body>
+<header><b>ATL <span>Bank</span></b><button id="out" class="sm hide">Log out</button></header>
+<main>
+
+<!-- AUTH -->
+<section id="auth" class="card">
+  <h2 id="authTitle">Log in to your wallet</h2>
+  <input id="name" class="hide" placeholder="Full name" autocomplete="name">
+  <input id="email" type="email" placeholder="Email" autocomplete="email">
+  <input id="pass" type="password" placeholder="Password (6+ characters)" autocomplete="current-password">
+  <button id="go">Log in</button>
+  <button id="swap" class="alt">Create an account</button>
+  <button id="forgot" class="alt">Forgot password</button>
+  <div id="msg"></div>
+</section>
+
+<!-- DASHBOARD -->
+<section id="app" class="hide">
+  <div class="bal"><small>Wallet balance</small><div id="bal">₦0.00</div></div>
+
+  <div class="card">
+    <h2>Request a deposit</h2>
+    <input id="amt" type="number" min="100" placeholder="Amount in ₦">
+    <button id="dep">Send deposit request</button>
+    <small>Your balance updates after ATL Bank confirms your payment.</small>
+  </div>
+
+  <div class="card"><h2>My deposits</h2><div id="list"></div></div>
+
+  <div class="card hide" id="admin">
+    <h2>Admin: pending deposits</h2><div id="pending"></div>
+  </div>
+</section>
+</main>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script>
+// 1) PASTE YOUR FIREBASE CONFIG HERE
+firebase.initializeApp({
+  apiKey:"YOUR_API_KEY",
+  authDomain:"YOUR_PROJECT.firebaseapp.com",
+  projectId:"YOUR_PROJECT_ID",
+  appId:"YOUR_APP_ID"
+});
+const auth=firebase.auth(), db=firebase.firestore();
+const $=id=>document.getElementById(id);
+const naira=n=>"₦"+Number(n||0).toLocaleString("en-NG",{minimumFractionDigits:2});
+let signup=false, unsubs=[];
+
+function show(m){$("msg").textContent=m||""}
+
+$("swap").onclick=()=>{
+  signup=!signup;
+  $("name").classList.toggle("hide",!signup);
+  $("authTitle").textContent=signup?"Open your ATL wallet":"Log in to your wallet";
+  $("go").textContent=signup?"Create account":"Log in";
+  $("swap").textContent=signup?"I already have an account":"Create an account";
+  show();
+};
+
+$("go").onclick=async()=>{
+  show();
+  const email=$("email").value.trim(), pass=$("pass").value;
+  try{
+    if(signup){
+      const name=$("name").value.trim();
+      if(!name) return show("Enter your full name.");
+      const c=await auth.createUserWithEmailAndPassword(email,pass);
+      await db.collection("users").doc(c.user.uid).set({name,email,balance:0,role:"user"});
+      await c.user.sendEmailVerification();
+      show("Account created. Check your email to verify it.");
+    }else{
+      await auth.signInWithEmailAndPassword(email,pass);
+    }
+  }catch(e){show(e.message)}
+};
+
+$("forgot").onclick=async()=>{
+  const email=$("email").value.trim();
+  if(!email) return show("Enter your email first.");
+  try{await auth.sendPasswordResetEmail(email);show("Reset link sent to your email.")}
+  catch(e){show(e.message)}
+};
+
+$("out").onclick=()=>auth.signOut();
+
+// Session persists on refresh (Firebase default). React to login state:
+auth.onAuthStateChanged(user=>{
+  unsubs.forEach(u=>u());unsubs=[];
+  $("auth").classList.toggle("hide",!!user);
+  $("app").classList.toggle("hide",!user);
+  $("out").classList.toggle("hide",!user);
+  if(!user) return;
+
+  unsubs.push(db.collection("users").doc(user.uid).onSnapshot(s=>{
+    const d=s.data()||{};
+    $("bal").textContent=naira(d.balance);
+    $("admin").classList.toggle("hide",d.role!=="admin");
+    if(d.role==="admin") loadPending();
+  }));
+
+  unsubs.push(db.collection("deposits").where("uid","==",user.uid)
+    .onSnapshot(q=>{
+      const rows=q.docs.map(x=>x.data()).sort((a,b)=>(b.at?.seconds||0)-(a.at?.seconds||0));
+      $("list").innerHTML=rows.length?rows.map(r=>
+        `<div class="row"><span>${naira(r.amount)}</span><span class="tag ${r.status==="APPROVED"?"ok":r.status==="REJECTED"?"no":""}">${r.status}</span></div>`
+      ).join(""):"<small>No deposits yet. Send your first request above.</small>";
+    }));
+});
+
+// Deposit request: always PENDING. No automatic credit.
+$("dep").onclick=async()=>{
+  const amount=Number($("amt").value);
+  if(!(amount>=100)) return alert("Minimum deposit is ₦100.");
+  await db.collection("deposits").add({
+    uid:auth.currentUser.uid, amount, status:"PENDING",
+    at:firebase.firestore.FieldValue.serverTimestamp()
+  });
+  $("amt").value="";
+};
+
+// Admin only: approve or reject
+function loadPending(){
+  unsubs.push(db.collection("deposits").where("status","==","PENDING").onSnapshot(q=>{
+    $("pending").innerHTML=q.docs.length?q.docs.map(d=>{
+      const r=d.data();
+      return `<div class="row"><span>${naira(r.amount)}<br><small>${r.uid.slice(0,8)}…</small></span>
+      <span><button class="sm" onclick="decide('${d.id}',true)">Approve</button>
+      <button class="sm alt" onclick="decide('${d.id}',false)">Reject</button></span></div>`;
+    }).join(""):"<small>Nothing pending.</small>";
+  }));
+}
+async function decide(id,ok){
+  const ref=db.collection("deposits").doc(id);
+  await db.runTransaction(async t=>{
+    const s=await t.get(ref), r=s.data();
+    if(r.status!=="PENDING") return;
+    if(ok){
+      const u=db.collection("users").doc(r.uid), us=await t.get(u);
+      t.update(u,{balance:(us.data().balance||0)+r.amount});
+    }
+    t.update(ref,{status:ok?"APPROVED":"REJECTED"});
+  });
+}
+</script>
+</body>
+</html>
